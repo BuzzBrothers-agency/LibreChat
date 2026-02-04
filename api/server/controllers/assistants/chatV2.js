@@ -153,6 +153,7 @@ const chatV2 = async (req, res) => {
         res,
         txData: {
           model,
+          spec: endpointOption.spec,
           user: req.user.id,
           tokenType: 'prompt',
           amount: promptTokens,
@@ -470,6 +471,7 @@ const chatV2 = async (req, res) => {
           ...completedRun.usage,
           user: req.user.id,
           model: completedRun.model ?? model,
+          spec: completedRun.spec ?? spec,
           conversationId,
         });
       }
@@ -478,6 +480,7 @@ const chatV2 = async (req, res) => {
         ...response.run.usage,
         user: req.user.id,
         model: response.run.model ?? model,
+        spec: response.run.spec ?? spec,
         conversationId,
       });
     }

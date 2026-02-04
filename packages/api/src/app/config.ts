@@ -14,9 +14,11 @@ import { isEnabled } from '~/utils';
 export function getBalanceConfig(appConfig?: AppConfig): Partial<TCustomConfig['balance']> | null {
   const isLegacyEnabled = isEnabled(process.env.CHECK_BALANCE);
   const startBalance = process.env.START_BALANCE;
+  const perSpec = isEnabled(process.env.PER_SPEC_BALANCE);
   /** @type {} */
   const config: Partial<TCustomConfig['balance']> = removeNullishValues({
     enabled: isLegacyEnabled,
+    perSpec,
     startBalance: startBalance != null && startBalance ? parseInt(startBalance, 10) : undefined,
   });
   if (!appConfig) {

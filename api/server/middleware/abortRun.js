@@ -65,6 +65,7 @@ async function abortRun(req, res) {
     await recordUsage({
       ...run.usage,
       model: run.model,
+      spec: run.spec,
       user: req.user.id,
       conversationId,
     });

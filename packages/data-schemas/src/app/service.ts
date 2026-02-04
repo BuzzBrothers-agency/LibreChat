@@ -51,6 +51,7 @@ export const AppService = async (params?: {
   const startBalance = process.env.START_BALANCE;
   const balance = config.balance ?? {
     enabled: process.env.CHECK_BALANCE?.toLowerCase().trim() === 'true',
+    perSpec: process.env.PER_SPEC_BALANCE?.toLowerCase().trim() === 'true',
     startBalance: startBalance ? parseInt(startBalance, 10) : undefined,
   };
   const transactions = config.transactions ?? configDefaults.transactions;

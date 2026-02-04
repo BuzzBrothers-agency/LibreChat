@@ -135,9 +135,10 @@ class BaseClient {
    * @param {number} completionTokens
    * @returns {Promise<void>}
    */
-  async recordTokenUsage({ model, balance, promptTokens, completionTokens }) {
+  async recordTokenUsage({ model, spec, balance, promptTokens, completionTokens }) {
     logger.debug('[BaseClient] `recordTokenUsage` not implemented.', {
       model,
+      spec,
       balance,
       promptTokens,
       completionTokens,
@@ -669,12 +670,16 @@ class BaseClient {
     }
 
     if (!isEdited && !this.skipSaveUserMessage) {
-      userMessagePromise = this.saveMessageToDatabase(userMessage, saveOptions, user);
-      this.savedMessageIds.add(userMessage.messageId);
-      if (typeof opts?.getReqData === 'function') {
-        opts.getReqData({
-          userMessagePromise,
-        });
+      try {
+        userMessagePromise = this.saveMessageToDatabase(userMessage, saveOptions, user);
+        this.savedMessageIds.add(userMessage.messageId);
+        if (typeof opts?.getReqData === 'function') {
+          opts.getReqData({
+            userMessagePromise,
+          });
+        }
+      } catch(error) {
+        logger.error('[BaseClient] Error saving user message to database', error);
       }
     }
 
@@ -692,6 +697,7 @@ class BaseClient {
           amount: promptTokens,
           endpoint: this.options.endpoint,
           model: this.modelOptions?.model ?? this.model,
+          spec: this.options.spec ?? this.modelOptions?.spec ?? this.spec,
           endpointTokenConfig: this.options.endpointTokenConfig,
         },
       });
@@ -781,6 +787,7 @@ class BaseClient {
           completionTokens,
           balance: balanceConfig,
           model: responseMessage.model,
+          spec: this.options.spec ?? this.modelOptions?.spec,
         });
       }
     }
@@ -847,6 +854,8 @@ class BaseClient {
     if (!shouldUpdateCount) {
       return;
     }
+
+    
 
     const userMessageTokenCount = this.calculateCurrentTokenCount({
       currentMessageId: userMessage.messageId,
@@ -951,7 +960,7 @@ class BaseClient {
       { context: 'api/app/clients/BaseClient.js - saveMessageToDatabase #saveMessage' },
     );
 
-    if (this.skipSaveConvo) {
+    if (this.skipSaveConvo || !this.options) {
       return { message: savedMessage };
     }
 
@@ -966,6 +975,10 @@ class BaseClient {
       this.fetchedConvo === true
         ? null
         : await getConvo(this.options?.req?.user?.id, message.conversationId);
+
+    if (!this.options) {
+      return { message: savedMessage };
+    }
 
     const unsetFields = {};
     const exceptions = new Set(['spec', 'iconURL']);

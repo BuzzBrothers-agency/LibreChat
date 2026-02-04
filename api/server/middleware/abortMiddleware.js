@@ -53,6 +53,7 @@ async function spendCollectedUsage({ userId, conversationId, collectedUsage, fal
       conversationId,
       user: userId,
       model: usage.model ?? fallbackModel,
+      spec: usage.spec
     };
 
     if (cache_creation > 0 || cache_read > 0) {

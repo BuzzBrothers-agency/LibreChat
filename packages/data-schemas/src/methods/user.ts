@@ -78,15 +78,18 @@ export function createUserMethods(mongoose: typeof import('mongoose')) {
     // If balance is enabled, create or update a balance record for the user
     if (balanceConfig?.enabled && balanceConfig?.startBalance) {
       const update: {
-        $inc: { tokenCredits: number };
-        $set?: {
+        $inc: { tokenCredits?: number; };
+        $set: Partial<{
           autoRefillEnabled: boolean;
           refillIntervalValue: number;
           refillIntervalUnit: string;
           refillAmount: number;
-        };
+          perSpecTokenCredits?: Record<string, number> 
+        }>;
       } = {
-        $inc: { tokenCredits: balanceConfig.startBalance },
+        $inc: {
+          tokenCredits: balanceConfig.startBalance
+        }, $set: {}
       };
 
       if (
@@ -101,6 +104,10 @@ export function createUserMethods(mongoose: typeof import('mongoose')) {
           refillIntervalUnit: balanceConfig.refillIntervalUnit,
           refillAmount: balanceConfig.refillAmount,
         };
+      }
+
+      if (balanceConfig.perSpec) {
+        update.$set.perSpecTokenCredits = {}
       }
 
       await Balance.findOneAndUpdate({ user: user._id }, update, {

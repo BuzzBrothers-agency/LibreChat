@@ -4,18 +4,49 @@ const { createAutoRefillTransaction } = require('./Transaction');
 const { logViolation } = require('~/cache');
 const { getMultiplier } = require('./tx');
 const { Balance } = require('~/db/models');
+const { camelCase } = require('lodash');
 
 function isInvalidDate(date) {
   return isNaN(date);
 }
 
 /**
+ * Update the balance record for a user, creating a new one if it doesn't exist.
+ *
+ * @param {Object} params - The function parameters.
+ * @param {string} params.spec - The model spec name or identifier.
+ * @param {Object} params.user - The user object.
+ * @param {number} params.amount - The new balance amount
+ * @param {Object} [params.setValues] - Additional fields to set on the balance record.
+ * @param {Partial<TCustomConfig['balance']>} params.balanceConfig - The balance configuration.
+ * @returns {Promise<Object>} The updated balance record.
+ */
+async function updateUserBalance({ spec, user, amount, balanceConfig, setValues }) {
+  let result;
+  if (balanceConfig.perSpec && spec) {
+    result = await Balance.findOneAndUpdate(
+      { user: user._id },
+      { $set: { [`perSpecTokenCredits.${camelCase(spec)}`]: amount, ...(setValues || {}) } },
+      { upsert: true, new: true },
+    ).lean();
+  } else {
+    result = await Balance.findOneAndUpdate(
+      { user: user._id },
+      { $set: { tokenCredits: amount, ...(setValues || {}) } },
+      { upsert: true, new: true },
+    ).lean();
+  }
+  return result;
+}
+
+/**
  * Simple check method that calculates token cost and returns balance info.
  * The auto-refill logic has been moved to balanceMethods.js to prevent circular dependencies.
  */
-const checkBalanceRecord = async function ({
+async function checkBalanceRecord({
   user,
   model,
+  spec,
   endpoint,
   valueKey,
   tokenType,
@@ -24,10 +55,10 @@ const checkBalanceRecord = async function ({
 }) {
   const multiplier = getMultiplier({ valueKey, tokenType, model, endpoint, endpointTokenConfig });
   const tokenCost = amount * multiplier;
+  const balance = await getUserBalance(user, spec);
 
   // Retrieve the balance record
-  let record = await Balance.findOne({ user }).lean();
-  if (!record) {
+  if (balance === undefined) {
     logger.debug('[Balance.check] No balance record found for user', { user });
     return {
       canSpend: false,
@@ -35,7 +66,6 @@ const checkBalanceRecord = async function ({
       tokenCost,
     };
   }
-  let balance = record.tokenCredits;
 
   logger.debug('[Balance.check] Initial state', {
     user,
@@ -50,13 +80,18 @@ const checkBalanceRecord = async function ({
   });
 
   // Only perform auto-refill if spending would bring the balance to 0 or below
-  if (balance - tokenCost <= 0 && record.autoRefillEnabled && record.refillAmount > 0) {
-    const lastRefillDate = new Date(record.lastRefill);
+  // And that the "perSpec" config is not being used
+  if (
+    balance.tokenCredits - tokenCost <= 0 &&
+    balance.autoRefillEnabled &&
+    balance.refillAmount > 0
+  ) {
+    const lastRefillDate = new Date(balance.lastRefill);
     const now = new Date();
     if (
       isInvalidDate(lastRefillDate) ||
       now >=
-        addIntervalToDate(lastRefillDate, record.refillIntervalValue, record.refillIntervalUnit)
+        addIntervalToDate(lastRefillDate, balance.refillIntervalValue, balance.refillIntervalUnit)
     ) {
       try {
         /** @type {{ rate: number, user: string, balance: number, transaction: import('@librechat/data-schemas').ITransaction}} */
@@ -64,7 +99,7 @@ const checkBalanceRecord = async function ({
           user: user,
           tokenType: 'credits',
           context: 'autoRefill',
-          rawAmount: record.refillAmount,
+          rawAmount: balance.refillAmount,
         });
         balance = result.balance;
       } catch (error) {
@@ -74,8 +109,38 @@ const checkBalanceRecord = async function ({
   }
 
   logger.debug('[Balance.check] Token cost', { tokenCost });
-  return { canSpend: balance >= tokenCost, balance, tokenCost };
-};
+  return { canSpend: balance.tokenCredits >= tokenCost, balance: balance.tokenCredits, tokenCost };
+}
+
+/**
+ * Get the balance for a user.
+ * If the balance is per-spec, it will return the per-spec balance if it exists and not the auto-refill info.
+ * @param {string} user - The user ID or identifier.
+ * @param {string} [spec=null] - The model spec name or identifier.
+ * @returns {Promise<{ perSpec: boolean, tokenCredits: number, autoRefillEnabled?: boolean, refillIntervalValue?: number, refillIntervalUnit?: string, lastRefill?: Date, refillAmount?: number } | undefined>} The user's balance or undefined if no record is found.
+ */
+async function getUserBalance(user, spec = null) {
+  const record = await Balance.findOne({ user }).lean();
+  if (!record) {
+    return;
+  }
+  const perSpecCredit = record.perSpecTokenCredits?.[camelCase(spec)];
+  if (perSpecCredit !== undefined) {
+    return {
+      perSpec: true,
+      tokenCredits: perSpecCredit,
+    };
+  }
+  return {
+    perSpec: false,
+    tokenCredits: record.tokenCredits,
+    autoRefillEnabled: record.autoRefillEnabled,
+    refillIntervalValue: record.refillIntervalValue,
+    refillIntervalUnit: record.refillIntervalUnit,
+    lastRefill: record.lastRefill,
+    refillAmount: record.refillAmount,
+  };
+}
 
 /**
  * Adds a time interval to a given date.
@@ -84,7 +149,7 @@ const checkBalanceRecord = async function ({
  * @param {'seconds'|'minutes'|'hours'|'days'|'weeks'|'months'} unit - The unit of time.
  * @returns {Date} A new Date representing the starting date plus the interval.
  */
-const addIntervalToDate = (date, value, unit) => {
+function addIntervalToDate(date, value, unit) {
   const result = new Date(date);
   switch (unit) {
     case 'seconds':
@@ -109,7 +174,7 @@ const addIntervalToDate = (date, value, unit) => {
       break;
   }
   return result;
-};
+}
 
 /**
  * Checks the balance for a user and determines if they can spend a certain amount.
@@ -129,7 +194,7 @@ const addIntervalToDate = (date, value, unit) => {
  * @returns {Promise<boolean>} Throws error if the user cannot spend the amount.
  * @throws {Error} Throws an error if there's an issue with the balance check.
  */
-const checkBalance = async ({ req, res, txData }) => {
+async function checkBalance({ req, res, txData }) {
   const { canSpend, balance, tokenCost } = await checkBalanceRecord(txData);
   if (canSpend) {
     return true;
@@ -147,10 +212,15 @@ const checkBalance = async ({ req, res, txData }) => {
     errorMessage.generations = txData.generations;
   }
 
-  await logViolation(req, res, type, errorMessage, 0);
+  // try {
+  //   await logViolation(req, res, type, errorMessage, 0);
+  // } catch(err) {
+  // }
   throw new Error(JSON.stringify(errorMessage));
-};
+}
 
 module.exports = {
   checkBalance,
+  getUserBalance,
+  updateUserBalance,
 };

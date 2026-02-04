@@ -508,6 +508,7 @@ const recordUsage = async ({
   prompt_tokens,
   completion_tokens,
   model,
+  spec,
   user,
   conversationId,
   context = 'message',
@@ -516,6 +517,7 @@ const recordUsage = async ({
     {
       user,
       model,
+      spec,
       context,
       conversationId,
     },

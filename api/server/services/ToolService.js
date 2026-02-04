@@ -56,6 +56,7 @@ const processVisionRequest = async (client, currentAction) => {
     recordUsage({
       user: client.req.user.id,
       model: client.req.body.model,
+      spec: client.req.body.spec,
       conversationId: (client.responseMessage ?? client.finalMessage).conversationId,
       ...completion.usage,
     });

@@ -647,6 +647,7 @@ export type TUpdateFeedbackResponse = {
 
 export type TBalanceResponse = {
   tokenCredits: number;
+  perSpecTokenCredits: Record<string, number> | null;
   // Automatic refill settings
   autoRefillEnabled: boolean;
   refillIntervalValue?: number;

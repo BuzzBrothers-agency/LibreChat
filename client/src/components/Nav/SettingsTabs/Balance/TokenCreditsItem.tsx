@@ -4,23 +4,69 @@ import { useLocalize } from '~/hooks';
 
 interface TokenCreditsItemProps {
   tokenCredits?: number;
+  perSpecTokenCredits?: Record<string, number> | null;
 }
 
-const TokenCreditsItem: React.FC<TokenCreditsItemProps> = ({ tokenCredits }) => {
+const TokenCreditsItem: React.FC<TokenCreditsItemProps> = ({
+  tokenCredits,
+  perSpecTokenCredits,
+}) => {
   const localize = useLocalize();
 
-  return (
-    <div className="flex items-center justify-between">
-      {/* Left Section: Label */}
-      <div className="flex items-center space-x-2">
-        <Label className="font-light">{localize('com_nav_balance')}</Label>
-        <InfoHoverCard side={ESide.Bottom} text={localize('com_nav_info_balance')} />
-      </div>
+  let totalTokenCredits = tokenCredits;
+  if (Object.keys(perSpecTokenCredits || {}).length > 0) {
+    totalTokenCredits = Object.values(perSpecTokenCredits || {}).reduce(
+      (acc, val) => acc + val,
+      totalTokenCredits || 0,
+    );
+  }
 
-      {/* Right Section: tokenCredits Value */}
-      <span className="text-sm font-medium text-gray-800 dark:text-gray-200" role="note">
-        {tokenCredits !== undefined ? tokenCredits.toFixed(2) : '0.00'}
-      </span>
+  return (
+    <div className="flex flex-col gap-4">
+      {/* Single total balance when no per-model breakdown */}
+      {!perSpecTokenCredits && (
+        <div className="flex grow items-center justify-between">
+          {/* Left Section: Label */}
+          <div className="flex items-center space-x-2">
+            <Label className="font-light">{localize('com_nav_balance')}</Label>
+            <InfoHoverCard side={ESide.Bottom} text={localize('com_nav_info_balance')} />
+          </div>
+
+          {/* Right Section: tokenCredits Value */}
+          <span className={`text-sm font-medium text-gray-800 dark:text-gray-200 ${tokenCredits === 0 ? 'text-red-600 dark:text-red-400' : ''}`} role="note">
+            {tokenCredits !== undefined ? tokenCredits.toFixed(2) : '0.00'}
+          </span>
+        </div>
+      )}
+      {/* Total Balance when per-model breakdown exists */}
+      {perSpecTokenCredits && (
+        <div className="flex grow items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Label className="font-light">{localize('com_nav_balance')}</Label>
+            <InfoHoverCard side={ESide.Bottom} text={localize('com_nav_info_balance')} />
+          </div>
+
+          {/* Right Section: total tokenCredits Value */}
+          <span className={`text-sm font-medium text-gray-800 dark:text-gray-200 ${totalTokenCredits === 0 ? 'text-red-600 dark:text-red-400' : ''}`} role="note">
+            {totalTokenCredits !== undefined ? totalTokenCredits.toFixed(2) : '0.00'}
+          </span>
+        </div>
+      )}
+      {/* Per-model token credits breakdown */}
+      {perSpecTokenCredits && Object.keys(perSpecTokenCredits).length > 0 && (
+        <div className="flex flex-col gap-1">
+          {Object.entries(perSpecTokenCredits).map(([model, credits]) => (
+            <div className="flex items-center justify-between" key={model}>
+              <span key={model} className="text-sm text-gray-600 dark:text-gray-400" role="note">
+                {model}
+              </span>
+              <span className={`text-sm text-gray-600 dark:text-gray-400 ${credits === 0 ? 'text-red-600 dark:text-red-400' : ''}`} role="note">
+                {credits.toFixed(2)}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

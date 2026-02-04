@@ -1,6 +1,8 @@
 const { logger } = require('@librechat/data-schemas');
 const { getMultiplier, getCacheMultiplier } = require('./tx');
 const { Transaction, Balance } = require('~/db/models');
+const { getBalanceConfig } = require('@librechat/api');
+const { camelCase } = require('lodash');
 
 const cancelRate = 1.15;
 
@@ -11,22 +13,29 @@ const cancelRate = 1.15;
  * @function
  * @param {Object} params - The function parameters.
  * @param {string|mongoose.Types.ObjectId} params.user - The user ID.
+ * @param {string} [params.spec] - Optional spec to determine which balance record to update if using per-spec balances.
  * @param {number} params.incrementValue - The value to increment the balance by (can be negative).
  * @param {import('mongoose').UpdateQuery<import('@librechat/data-schemas').IBalance>['$set']} [params.setValues] - Optional additional fields to set.
  * @returns {Promise<Object>} Returns the updated balance document (lean).
  * @throws {Error} Throws an error if the update fails after multiple retries.
  */
-const updateBalance = async ({ user, incrementValue, setValues }) => {
+const updateBalance = async ({ user, spec, incrementValue, setValues }) => {
   let maxRetries = 10; // Number of times to retry on conflict
   let delay = 50; // Initial retry delay in ms
   let lastError = null;
 
+  const balanceConfig = getBalanceConfig();
+  const camelSpec = spec ? camelCase(spec) : null;
+  
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     let currentBalanceDoc;
     try {
       // 1. Read the current document state
       currentBalanceDoc = await Balance.findOne({ user }).lean();
-      const currentCredits = currentBalanceDoc ? currentBalanceDoc.tokenCredits : 0;
+      let currentCredits = currentBalanceDoc ? currentBalanceDoc.tokenCredits : 0;
+      if (camelSpec && balanceConfig.perSpec && currentBalanceDoc.perSpecTokenCredits?.[camelSpec] != null) {
+        currentCredits = currentBalanceDoc.perSpecTokenCredits[camelSpec];
+      }
 
       // 2. Calculate the desired new state
       const potentialNewCredits = currentCredits + incrementValue;
@@ -35,21 +44,30 @@ const updateBalance = async ({ user, incrementValue, setValues }) => {
       // 3. Prepare the update payload
       const updatePayload = {
         $set: {
-          tokenCredits: newCredits,
           ...(setValues || {}), // Merge other values to set
         },
       };
+      if (camelSpec && balanceConfig.perSpec) {
+        updatePayload.$set[`perSpecTokenCredits.${camelSpec}`] = newCredits;
+      } else {
+        updatePayload.$set.tokenCredits = newCredits;
+      }
+
+      console.log('PA', updatePayload);
 
       // 4. Attempt the conditional update or upsert
       let updatedBalance = null;
       if (currentBalanceDoc) {
-        // --- Document Exists: Perform Conditional Update ---
-        // Try to update only if the tokenCredits match the value we read (currentCredits)
+        // Use optimistic concurrency: only update if the credits value matches what we read
+        const filter = {
+          user,
+          // @TODO     add perSpecTokenCredits condition when spec is used for concurrency control
+          // ...(balanceConfig.perSpec && spec
+          //   ? { [`perSpecTokenCredits.${camelCase(spec)}`]: currentCredits }
+          //   : { tokenCredits: currentCredits }),
+        };
         updatedBalance = await Balance.findOneAndUpdate(
-          {
-            user: user,
-            tokenCredits: currentCredits, // Optimistic lock: condition based on the read value
-          },
+          filter,
           updatePayload,
           {
             new: true, // Return the modified document
@@ -171,6 +189,7 @@ async function createAutoRefillTransaction(txData) {
 
   const balanceResponse = await updateBalance({
     user: transaction.user,
+    spec: txData.spec,
     incrementValue: txData.rawAmount,
     setValues: { lastRefill: new Date() },
   });
@@ -189,7 +208,9 @@ async function createAutoRefillTransaction(txData) {
  * @param {txData} _txData - Transaction data.
  */
 async function createTransaction(_txData) {
-  const { balance, transactions, ...txData } = _txData;
+  console.log('CT', _txData);
+
+  const { balance, transactions, spec, ...txData } = _txData;
   if (txData.rawAmount != null && isNaN(txData.rawAmount)) {
     return;
   }
@@ -210,6 +231,7 @@ async function createTransaction(_txData) {
   let incrementValue = transaction.tokenValue;
   const balanceResponse = await updateBalance({
     user: transaction.user,
+    spec,
     incrementValue,
   });
 
@@ -226,7 +248,7 @@ async function createTransaction(_txData) {
  * @param {txData} _txData - Transaction data.
  */
 async function createStructuredTransaction(_txData) {
-  const { balance, transactions, ...txData } = _txData;
+  const { balance, spec, transactions, ...txData } = _txData;
   if (transactions?.enabled === false) {
     return;
   }
@@ -248,6 +270,7 @@ async function createStructuredTransaction(_txData) {
 
   const balanceResponse = await updateBalance({
     user: transaction.user,
+    spec,
     incrementValue,
   });
 

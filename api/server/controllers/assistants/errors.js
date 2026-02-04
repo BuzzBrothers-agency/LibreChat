@@ -122,6 +122,7 @@ const createErrorHandler = ({ req, res, getContext, originPath = '/assistants/ch
       await recordUsage({
         ...run.usage,
         model: run.model,
+        spec: run.spec,
         user: req.user.id,
         conversationId,
       });

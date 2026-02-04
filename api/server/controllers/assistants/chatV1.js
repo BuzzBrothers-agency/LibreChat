@@ -53,6 +53,7 @@ const chatV1 = async (req, res) => {
   const {
     text,
     model,
+    spec,
     endpoint,
     files = [],
     promptPrefix,
@@ -167,6 +168,7 @@ const chatV1 = async (req, res) => {
       await recordUsage({
         ...run.usage,
         model: run.model,
+        spec: run.spec,
         user: req.user.id,
         conversationId,
       });
@@ -280,6 +282,7 @@ const chatV1 = async (req, res) => {
         res,
         txData: {
           model,
+          spec,
           user: req.user.id,
           tokenType: 'prompt',
           amount: promptTokens,
@@ -312,6 +315,7 @@ const chatV1 = async (req, res) => {
     const body = createRunBody({
       assistant_id,
       model,
+      spec,
       promptPrefix,
       instructions,
       endpointOption,
@@ -456,6 +460,7 @@ const chatV1 = async (req, res) => {
         assistant_id,
         thread_id,
         model: assistant_id,
+        spec,
         endpoint,
       };
 
@@ -471,6 +476,7 @@ const chatV1 = async (req, res) => {
         instructions: instructions,
         assistant_id,
         // model,
+        spec
       };
 
       if (file_ids.length) {
@@ -495,6 +501,7 @@ const chatV1 = async (req, res) => {
           assistant_id,
           thread_id,
           model: assistant_id,
+          spec,
         },
       });
     };
@@ -505,6 +512,7 @@ const chatV1 = async (req, res) => {
     const processRun = async (retry = false) => {
       if (endpoint === EModelEndpoint.azureAssistants) {
         body.model = openai._options.model;
+        body.spec = spec;
         openai.attachedFileIds = attachedFileIds;
         openai.visionPromise = visionPromise;
         if (retry) {
@@ -593,6 +601,7 @@ const chatV1 = async (req, res) => {
       assistant_id,
       thread_id,
       model: assistant_id,
+      spec,
       endpoint,
       spec: endpointOption.spec,
       iconURL: endpointOption.iconURL,
@@ -611,7 +620,7 @@ const chatV1 = async (req, res) => {
     if (userMessagePromise) {
       await userMessagePromise;
     }
-    await saveAssistantMessage(req, { ...responseMessage, model });
+    await saveAssistantMessage(req, { ...responseMessage, model, spec });
 
     if (parentMessageId === Constants.NO_PARENT && !_thread_id) {
       addTitle(req, {
@@ -636,6 +645,7 @@ const chatV1 = async (req, res) => {
           ...completedRun.usage,
           user: req.user.id,
           model: completedRun.model ?? model,
+          spec: completedRun.spec ?? spec,
           conversationId,
         });
       }
@@ -644,6 +654,7 @@ const chatV1 = async (req, res) => {
         ...response.run.usage,
         user: req.user.id,
         model: response.run.model ?? model,
+        spec: response.run.spec ?? spec,
         conversationId,
       });
     }

@@ -47,6 +47,7 @@ export interface IUser extends Document {
 
 export interface BalanceConfig {
   enabled?: boolean;
+  perSpec?: boolean;
   startBalance?: number;
   autoRefillEnabled?: boolean;
   refillIntervalValue?: number;
