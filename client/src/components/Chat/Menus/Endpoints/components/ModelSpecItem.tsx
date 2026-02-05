@@ -8,7 +8,7 @@ import { useLocalize } from '~/hooks';
 import SpecIcon from './SpecIcon';
 import { cn } from '~/utils';
 import { useGetUserBalance } from '~/data-provider';
-import { camelCase } from 'lodash';
+import { kebabCase } from 'lodash';
 
 interface ModelSpecItemProps {
   spec: TModelSpec;
@@ -19,7 +19,7 @@ export function ModelSpecItem({ spec, isSelected }: ModelSpecItemProps) {
   const localize = useLocalize();
   const balance = useGetUserBalance()
   const { handleSelectSpec, endpointsConfig } = useModelSelectorContext();
-  const modelCredits = balance.data.perSpecTokenCredits?.[camelCase(spec.name)];
+  const modelCredits = balance.data.perSpecTokenCredits?.[kebabCase(spec.name)];
   const { showIconInMenu = true } = spec;
   return (
     <MenuItem
@@ -42,7 +42,7 @@ export function ModelSpecItem({ spec, isSelected }: ModelSpecItemProps) {
           </div>
         )}
         <div className="flex min-w-0 flex-col gap-1">
-          <span className="truncate text-left">{spec.label} {modelCredits && (<span className={`text-xs text-gray-600 dark:text-gray-400 ${modelCredits === 0 ? 'text-red-400 dark:text-red-400' : ''}`}>{localize('com_ui_balance_tokens_left', { 0: modelCredits })}</span>)}</span>
+          <span className="truncate text-left">{spec.label} {modelCredits !== undefined && (<span className={`text-xs text-gray-600 dark:text-gray-400 ${modelCredits === 0 ? 'text-red-400 dark:text-red-400' : ''}`}>{localize('com_ui_balance_tokens_left', { 0: modelCredits })}</span>)}</span>
           {spec.description && (
             <span className="break-words text-xs font-normal">{spec.description}</span>
           )}

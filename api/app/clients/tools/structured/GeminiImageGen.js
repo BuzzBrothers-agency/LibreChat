@@ -326,6 +326,7 @@ function checkForSafetyBlock(response) {
  * @param {string} params.userId - The user ID
  * @param {string} params.conversationId - The conversation ID
  * @param {string} params.model - The model name
+ * @param {@import('librechat-data-provider').AppConfig} appConfig - The app configuration
  */
 async function recordTokenUsage({ usageMetadata, req, userId, conversationId, model, spec }) {
   if (!usageMetadata) {
@@ -374,6 +375,7 @@ async function recordTokenUsage({ usageMetadata, req, userId, conversationId, mo
         promptTokens,
         completionTokens,
       },
+      appConfig
     );
   } catch (error) {
     logger.error('[GeminiImageGen] Error recording token usage:', error);

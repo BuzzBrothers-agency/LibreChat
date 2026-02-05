@@ -795,6 +795,7 @@ class AgentClient extends BaseClient {
    * @param {AppConfig['balance']} [params.balance]
    * @param {AppConfig['transactions']} [params.transactions]
    * @param {UsageMetadata[]} [params.collectedUsage=this.collectedUsage]
+   * @param {@import('librechat-data-provider').AppConfig} appConfig The app configuration
    */
   async recordCollectedUsage({
     model,
@@ -803,7 +804,7 @@ class AgentClient extends BaseClient {
     transactions,
     context = 'message',
     collectedUsage = this.collectedUsage,
-  }) {
+  }, appConfig) {
     if (!collectedUsage || !collectedUsage.length) {
       return;
     }
@@ -869,7 +870,7 @@ class AgentClient extends BaseClient {
       spendTokens(txMetadata, {
         promptTokens: usage.input_tokens,
         completionTokens: usage.output_tokens,
-      }).catch((err) => {
+      }, appConfig).catch((err) => {
         logger.error(
           '[api/server/controllers/agents/client.js #recordCollectedUsage] Error spending tokens',
           err,
@@ -1116,7 +1117,7 @@ class AgentClient extends BaseClient {
             context: 'message',
             balance: balanceConfig,
             transactions: transactionsConfig,
-          });
+          }, appConfig);
         } else {
           logger.debug(
             '[api/server/controllers/agents/client.js #chatCompletion] Skipping token spending - handled by abort middleware',
@@ -1328,7 +1329,7 @@ class AgentClient extends BaseClient {
         spec: clientOptions.spec,
         balance: balanceConfig,
         transactions: transactionsConfig,
-      }).catch((err) => {
+      }, appConfig).catch((err) => {
         logger.error(
           '[api/server/controllers/agents/client.js #titleConvo] Error recording collected usage',
           err,
@@ -1373,6 +1374,7 @@ class AgentClient extends BaseClient {
           endpointTokenConfig: this.options.endpointTokenConfig,
         },
         { promptTokens, completionTokens },
+        this.options.req.config
       );
 
       if (
@@ -1392,6 +1394,7 @@ class AgentClient extends BaseClient {
             endpointTokenConfig: this.options.endpointTokenConfig,
           },
           { completionTokens: usage.reasoning_tokens },
+          this.options.req.config
         );
       }
     } catch (error) {

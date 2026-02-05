@@ -157,6 +157,7 @@ const chatV2 = async (req, res) => {
           user: req.user.id,
           tokenType: 'prompt',
           amount: promptTokens,
+          modelSpecsConfig: appConfig?.modelSpecs,
         },
       });
     };
@@ -473,7 +474,7 @@ const chatV2 = async (req, res) => {
           model: completedRun.model ?? model,
           spec: completedRun.spec ?? spec,
           conversationId,
-        });
+        }, req.config);
       }
     } else {
       await recordUsage({
@@ -482,7 +483,7 @@ const chatV2 = async (req, res) => {
         model: response.run.model ?? model,
         spec: response.run.spec ?? spec,
         conversationId,
-      });
+      }, req.config);
     }
   } catch (error) {
     await handleError(error);

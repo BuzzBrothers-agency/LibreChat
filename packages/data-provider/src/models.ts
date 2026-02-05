@@ -12,6 +12,7 @@ export type TModelSpec = {
   name: string;
   label: string;
   preset: TPreset;
+  balance?: boolean;
   order?: number;
   default?: boolean;
   description?: string;
@@ -42,6 +43,7 @@ export const tModelSpecSchema = z.object({
   name: z.string(),
   label: z.string(),
   preset: tPresetSchema,
+  balance: z.boolean().optional(),
   order: z.number().optional(),
   default: z.boolean().optional(),
   description: z.string().optional(),

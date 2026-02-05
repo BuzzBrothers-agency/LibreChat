@@ -9,6 +9,8 @@ function Balance() {
   const { isAuthenticated } = useAuthContext();
   const { data: startupConfig } = useGetStartupConfig();
 
+  console.log('sta', startupConfig);
+
   const balanceQuery = useGetUserBalance({
     enabled: !!isAuthenticated && !!startupConfig?.balance?.enabled,
   });

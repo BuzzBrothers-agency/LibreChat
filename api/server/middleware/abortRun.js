@@ -68,7 +68,7 @@ async function abortRun(req, res) {
       spec: run.spec,
       user: req.user.id,
       conversationId,
-    });
+    }, req.config);
   } catch (error) {
     logger.error('[abortRun] Error fetching or processing run', error);
   }

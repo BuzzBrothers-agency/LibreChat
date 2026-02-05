@@ -171,7 +171,7 @@ const chatV1 = async (req, res) => {
         spec: run.spec,
         user: req.user.id,
         conversationId,
-      });
+      }, req.config);
     } catch (error) {
       logger.error('[/assistants/chat/] Error fetching or processing run', error);
     }
@@ -286,6 +286,7 @@ const chatV1 = async (req, res) => {
           user: req.user.id,
           tokenType: 'prompt',
           amount: promptTokens,
+          modelSpecsConfig: appConfig?.modelSpecs,
         },
       });
     };
@@ -647,7 +648,7 @@ const chatV1 = async (req, res) => {
           model: completedRun.model ?? model,
           spec: completedRun.spec ?? spec,
           conversationId,
-        });
+        }, req.config);
       }
     } else {
       await recordUsage({
@@ -656,7 +657,7 @@ const chatV1 = async (req, res) => {
         model: response.run.model ?? model,
         spec: response.run.spec ?? spec,
         conversationId,
-      });
+      }, req.config);
     }
   } catch (error) {
     await handleError(error);

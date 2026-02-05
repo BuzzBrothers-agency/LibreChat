@@ -1,13 +1,20 @@
 const { logger } = require('@librechat/data-schemas');
 const { ViolationTypes } = require('librechat-data-provider');
 const { createAutoRefillTransaction } = require('./Transaction');
-const { logViolation } = require('~/cache');
+// const { logViolation } = require('~/cache');
 const { getMultiplier } = require('./tx');
 const { Balance } = require('~/db/models');
-const { camelCase } = require('lodash');
+const { kebabCase } = require('lodash');
 
 function isInvalidDate(date) {
   return isNaN(date);
+}
+
+function findModelSpecByName(appConfig, specName) {
+  return (
+    appConfig.modelSpecs?.list?.find((spec) => kebabCase(spec.name) === kebabCase(specName)) ||
+    null
+  );
 }
 
 /**
@@ -18,44 +25,41 @@ function isInvalidDate(date) {
  * @param {Object} params.user - The user object.
  * @param {number} params.amount - The new balance amount
  * @param {Object} [params.setValues] - Additional fields to set on the balance record.
- * @param {Partial<TCustomConfig['balance']>} params.balanceConfig - The balance configuration.
+ * @param {import('@librechat/data-schemas').AppConfig} appConfig - The app configuration.
  * @returns {Promise<Object>} The updated balance record.
  */
-async function updateUserBalance({ spec, user, amount, balanceConfig, setValues }) {
-  let result;
-  if (balanceConfig.perSpec && spec) {
-    result = await Balance.findOneAndUpdate(
-      { user: user._id },
-      { $set: { [`perSpecTokenCredits.${camelCase(spec)}`]: amount, ...(setValues || {}) } },
-      { upsert: true, new: true },
-    ).lean();
-  } else {
-    result = await Balance.findOneAndUpdate(
-      { user: user._id },
-      { $set: { tokenCredits: amount, ...(setValues || {}) } },
-      { upsert: true, new: true },
-    ).lean();
+async function updateUserBalance({ spec, user, amount, setValues }, appConfig) {
+  // If spec is provided, check for per-spec balance first
+  if (spec) {
+    const modelSpec = findModelSpecByName(appConfig, spec);
+    if (modelSpec?.balance) {
+      return Balance.findOneAndUpdate(
+        { user: user._id },
+        { $set: { [`perSpecTokenCredits.${dashCa(spec)}`]: amount, ...(setValues || {}) } },
+        { upsert: true, new: true },
+      ).lean();
+    }
   }
-  return result;
+
+  // return general balance update
+  return await Balance.findOneAndUpdate(
+    { user: user._id },
+    { $set: { tokenCredits: amount, ...(setValues || {}) } },
+    { upsert: true, new: true },
+  ).lean();
 }
 
 /**
  * Simple check method that calculates token cost and returns balance info.
  * The auto-refill logic has been moved to balanceMethods.js to prevent circular dependencies.
  */
-async function checkBalanceRecord({
-  user,
-  model,
-  spec,
-  endpoint,
-  valueKey,
-  tokenType,
-  amount,
-  endpointTokenConfig,
-}) {
+async function checkBalanceRecord(
+  { user, model, spec, endpoint, valueKey, tokenType, amount, endpointTokenConfig },
+  appConfig,
+) {
   const multiplier = getMultiplier({ valueKey, tokenType, model, endpoint, endpointTokenConfig });
   const tokenCost = amount * multiplier;
-  const balance = await getUserBalance(user, spec);
+  const balance = await getUserBalance({ user, spec }, appConfig);
 
   // Retrieve the balance record
   if (balance === undefined) {
@@ -80,7 +84,7 @@ async function checkBalanceRecord({
   });
 
   // Only perform auto-refill if spending would bring the balance to 0 or below
-  // And that the "perSpec" config is not being used
+  // And that the "balance" config is not being used
   if (
     balance.tokenCredits - tokenCost <= 0 &&
     balance.autoRefillEnabled &&
@@ -115,24 +119,30 @@ async function checkBalanceRecord({
 /**
  * Get the balance for a user.
  * If the balance is per-spec, it will return the per-spec balance if it exists and not the auto-refill info.
- * @param {string} user - The user ID or identifier.
- * @param {string} [spec=null] - The model spec name or identifier.
- * @returns {Promise<{ perSpec: boolean, tokenCredits: number, autoRefillEnabled?: boolean, refillIntervalValue?: number, refillIntervalUnit?: string, lastRefill?: Date, refillAmount?: number } | undefined>} The user's balance or undefined if no record is found.
+ * @param {string} params.user - The user ID or identifier.
+ * @param {string} [params.spec] - The model spec name or identifier.
+ * @param {import('@librechat/data-schemas').AppConfig} appConfig - The app configuration.
+ * @returns {Promise<{ spec?: string, tokenCredits: number, autoRefillEnabled?: boolean, refillIntervalValue?: number, refillIntervalUnit?: string, lastRefill?: Date, refillAmount?: number } | undefined>} The user's balance or undefined if no record is found.
  */
-async function getUserBalance(user, spec = null) {
+async function getUserBalance({ user, spec }, appConfig) {
   const record = await Balance.findOne({ user }).lean();
   if (!record) {
     return;
   }
-  const perSpecCredit = record.perSpecTokenCredits?.[camelCase(spec)];
-  if (perSpecCredit !== undefined) {
-    return {
-      perSpec: true,
-      tokenCredits: perSpecCredit,
-    };
+
+  // If spec is provided, check for per-spec balance first
+  if (spec) {
+    const modelSpec = findModelSpecByName(appConfig, spec);
+    if (modelSpec?.balance) {
+      return {
+        spec,
+        tokenCredits: record.perSpecTokenCredits?.[kebabCase(spec)] || 0,
+      };
+    }
   }
+
+  // Return general balance
   return {
-    perSpec: false,
     tokenCredits: record.tokenCredits,
     autoRefillEnabled: record.autoRefillEnabled,
     refillIntervalValue: record.refillIntervalValue,
@@ -190,12 +200,14 @@ function addIntervalToDate(date, value, unit) {
  * @param {('prompt' | 'completion')} params.txData.tokenType - The type of token.
  * @param {number} params.txData.amount - The amount of tokens.
  * @param {string} params.txData.model - The model name or identifier.
+ * @param {string} [params.txData.spec] - The model spec name or identifier.
  * @param {string} [params.txData.endpointTokenConfig] - The token configuration for the endpoint.
+ * @param {import('@librechat/data-schemas').AppConfig} appConfig - The app configuration.
  * @returns {Promise<boolean>} Throws error if the user cannot spend the amount.
  * @throws {Error} Throws an error if there's an issue with the balance check.
  */
-async function checkBalance({ req, res, txData }) {
-  const { canSpend, balance, tokenCost } = await checkBalanceRecord(txData);
+async function checkBalance({ req, res, txData }, appConfig) {
+  const { canSpend, balance, tokenCost } = await checkBalanceRecord(txData, appConfig);
   if (canSpend) {
     return true;
   }
@@ -211,11 +223,9 @@ async function checkBalance({ req, res, txData }) {
   if (txData.generations && txData.generations.length > 0) {
     errorMessage.generations = txData.generations;
   }
-
-  // try {
-  //   await logViolation(req, res, type, errorMessage, 0);
-  // } catch(err) {
-  // }
+  
+  // @TODO     check why logViolation is undefined...
+  // await logViolation(req, res, type, errorMessage, 0);
   throw new Error(JSON.stringify(errorMessage));
 }
 

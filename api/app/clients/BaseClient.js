@@ -129,10 +129,10 @@ class BaseClient {
    * Abstract method to record token usage. Subclasses must implement this method.
    * If a correction to the token usage is needed, the method should return an object with the corrected token counts.
    * Should only be used if `recordCollectedUsage` was not used instead.
-   * @param {string} [model]
-   * @param {AppConfig['balance']} [balance]
-   * @param {number} promptTokens
-   * @param {number} completionTokens
+   * @param {string} [params.model]
+   * @param {AppConfig['balance']} [params.balance]
+   * @param {number} params.promptTokens
+   * @param {number} params.completionTokens
    * @returns {Promise<void>}
    */
   async recordTokenUsage({ model, spec, balance, promptTokens, completionTokens }) {
@@ -700,7 +700,7 @@ class BaseClient {
           spec: this.options.spec ?? this.modelOptions?.spec ?? this.spec,
           endpointTokenConfig: this.options.endpointTokenConfig,
         },
-      });
+      }, appConfig);
     }
 
     const { completion, metadata } = await this.sendCompletion(payload, opts);
@@ -788,7 +788,7 @@ class BaseClient {
           balance: balanceConfig,
           model: responseMessage.model,
           spec: this.options.spec ?? this.modelOptions?.spec,
-        });
+        }, appConfig);
       }
     }
 

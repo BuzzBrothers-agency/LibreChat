@@ -1,15 +1,14 @@
 const path = require('path');
 const mongoose = require('mongoose');
-const { getBalanceConfig, model } = require('@librechat/api');
+const { getBalanceConfig } = require('@librechat/api');
 const { User, Balance } = require('@librechat/data-schemas').createModels(mongoose);
-const dataProviders = require('@librechat/api');
 require('module-alias')({ base: path.resolve(__dirname, '..', 'api') });
+const { getAppConfig } = require('~/server/services/Config');
 const { askQuestion, silentExit } = require('./helpers');
+const { kebabCase } = require('lodash');
 const connect = require('./connect');
-const { camelCase } = require('lodash');
-
 (async () => {
-  await connect();
+  await connect();;
 
   /**
    * Show the welcome / help menu
@@ -17,32 +16,25 @@ const { camelCase } = require('lodash');
   console.purple('--------------------------');
   console.purple('Set balance to a user account!');
   console.purple('--------------------------');
+
   /**
    * Set up the variables we need and get the arguments if they were passed in
    */
-  let email = '';
-  let amount = '';
-  let spec = '';
+  let email = process.argv[2];
+  let amount = process.argv[3];
+  let spec = process.argv[4];
 
-  const balanceConfig = getBalanceConfig();
-  console.log(balanceConfig);
+  const appConfig = await getAppConfig();
+  const balanceConfig = getBalanceConfig(appConfig);
   if (!balanceConfig?.enabled) {
     console.red('Error: Balance is not enabled. Use librechat.yaml to enable it');
     silentExit(1);
   }
 
-  // If we have the right number of arguments, lets use them
-  if (process.argv.length >= balanceConfig.perSpec ? 4 : 3) {
-    email = process.argv[2];
-    amount = process.argv[3];
-    spec = process.argv[4];
-  } else {
-    console.orange(
-      `Usage: npm run set-balance <email> <amount> ${balanceConfig.perSpec ? '<spec>' : ''}`,
-    );
+  if (!process.argv[2]) {
+    console.orange(`Usage: npm run set-balance <email*> <amount> <spec>`);
     console.orange('Note: if you do not pass in the arguments, you will be prompted for them.');
     console.purple('--------------------------');
-    // console.purple(`[DEBUG] Args Length: ${process.argv.length}`);
   }
 
   /**
@@ -70,14 +62,14 @@ const { camelCase } = require('lodash');
   if (!balance) {
     console.purple('User has no balance!');
   } else {
-    if (balanceConfig.perSpec) {
-      console.purple(`Current balance: ${balance.tokenCredits}`);
-      console.orange('Per spec balances:');
-      for (const [specName, specBalance] of Object.entries(balance.perSpecTokenCredits || {})) {
-        console.orange(`- ${specName}: ${specBalance}`);
+    console.purple(`Current balance: ${balance.tokenCredits}`);
+    for (let modelSpec of appConfig.modelSpecs?.list || []) {
+      if (!modelSpec.balance) {
+        continue;
       }
-    } else {
-      console.purple(`Current Balance: ${balance.tokenCredits}`);
+      const specKey = kebabCase(modelSpec.name);
+      const specBalance = balance.perSpecTokenCredits?.[specKey] || 0;
+      console.purple(`- ${modelSpec.label ?? modelSpec.name}: ${specBalance}`);
     }
   }
 
@@ -92,8 +84,19 @@ const { camelCase } = require('lodash');
   }
 
   // Asking the model you want to set balance for
-  if (balanceConfig.perSpec && !spec) {
-    spec = await askQuestion('Spec (null):');
+  if (!spec) {
+    spec = await askQuestion('Model spec name (null):');
+  }
+  // check if the spec exists
+  if (spec) {
+    const specKey = kebabCase(spec);
+    const specExists = (appConfig.modelSpecs?.list || []).find(
+      (modelSpec) => kebabCase(modelSpec.name) === specKey,
+    );
+    if (!specExists) {
+      console.red(`Error: Spec "${spec}" does not exist in the config!`);
+      silentExit(1);
+    }
   }
 
   /**
@@ -101,10 +104,10 @@ const { camelCase } = require('lodash');
    */
   let result;
   try {
-    if (balanceConfig.perSpec && spec) {
+    if (spec) {
       result = await Balance.findOneAndUpdate(
         { user: user._id },
-        { $set: { [`perSpecTokenCredits.${camelCase(spec)}`]: amount } },
+        { $set: { [`perSpecTokenCredits.${kebabCase(spec)}`]: amount } },
         { upsert: true, new: true },
       ).lean();
     } else {
@@ -114,7 +117,6 @@ const { camelCase } = require('lodash');
         { upsert: true, new: true },
       ).lean();
     }
-
   } catch (error) {
     console.red('Error: ' + error.message);
     console.error(error);
@@ -129,7 +131,6 @@ const { camelCase } = require('lodash');
   }
 
   // Print out the new balance
-  console.green('Balance set successfully!');
   if (spec) {
     console.purple(`New Balance for spsec ${spec}: ${amount}`);
   } else {
@@ -137,6 +138,7 @@ const { camelCase } = require('lodash');
   }
 
   // Done!
+  console.green('Balance set successfully!');
   silentExit(0);
 })();
 
