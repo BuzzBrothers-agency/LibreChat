@@ -243,26 +243,6 @@ describe('User Methods - Database Tests', () => {
       expect(balance).toBeDefined();
       expect(balance?.tokenCredits).toBe(1000);
     });
-
-    test('should create balance record with perSpecTokenCredits when balanceConfig is provided and perSpec is true', async () => {
-      const userId = await methods.createUser(
-        {
-          name: 'Balance User',
-          email: 'balance@example.com',
-          provider: 'local',
-        },
-        {
-          enabled: true,
-          perSpec: true,
-          startBalance: 1000,
-        },
-      );
-
-      const balance = await Balance.findOne({ user: userId });
-      expect(balance).toBeDefined();
-      expect(balance?.perSpecTokenCredits).toBeDefined();
-      expect(balance?.tokenCredits).toBe(1000);
-    });
   });
 
   describe('updateUser', () => {

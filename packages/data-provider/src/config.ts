@@ -887,7 +887,6 @@ export const ocrSchema = z.object({
 
 export const balanceSchema = z.object({
   enabled: z.boolean().optional().default(false),
-  perSpec: z.boolean().optional().default(false),
   startBalance: z.number().optional().default(20000),
   autoRefillEnabled: z.boolean().optional().default(false),
   refillIntervalValue: z.number().optional().default(30),

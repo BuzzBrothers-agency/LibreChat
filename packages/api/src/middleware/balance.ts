@@ -27,13 +27,8 @@ function buildUpdateFields(
   // Ensure user record has the required fields
   if (!userRecord) {
     updateFields.user = userId;
-
-    // handle per model balance
-    if (config.perSpec) {
-      updateFields.perSpecTokenCredits = {};
-    } else {
-      updateFields.tokenCredits = config.startBalance;
-    }
+    updateFields.tokenCredits = config.startBalance;
+    updateFields.perSpecTokenCredits = {};
   }
 
   if (userRecord?.tokenCredits == null && config.startBalance != null) {

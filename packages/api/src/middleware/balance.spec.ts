@@ -164,45 +164,6 @@ describe('createSetBalanceConfig', () => {
       expect(balanceRecord?.tokenCredits).toBe(1000);
     });
 
-    test('should create balance record and perSpecTokenCredits for new user with perSpec enabled', async () => {
-      const userId = new mongoose.Types.ObjectId();
-      const getAppConfig = jest.fn().mockResolvedValue({
-        balance: {
-          enabled: true,
-          perSpec: true,
-          startBalance: 1000,
-          autoRefillEnabled: true,
-          refillIntervalValue: 30,
-          refillIntervalUnit: 'days',
-          refillAmount: 500,
-        },
-      });
-
-      const middleware = createSetBalanceConfig({
-        getAppConfig,
-        Balance,
-      });
-
-      const req = createMockRequest(userId);
-      const res = createMockResponse();
-
-      await middleware(req as ServerRequest, res as ServerResponse, mockNext);
-
-      expect(getAppConfig).toHaveBeenCalled();
-      expect(mockNext).toHaveBeenCalled();
-
-      const balanceRecord = await Balance.findOne({ user: userId });
-      expect(balanceRecord).toBeTruthy();
-      expect(balanceRecord?.tokenCredits).toBe(1000);
-      expect(balanceRecord?.perSpecTokenCredits).toEqual({});
-      expect(balanceRecord?.autoRefillEnabled).toBe(true);
-      expect(balanceRecord?.refillIntervalValue).toBe(30);
-      expect(balanceRecord?.refillIntervalUnit).toBe('days');
-      expect(balanceRecord?.refillAmount).toBe(500);
-      expect(balanceRecord?.lastRefill).toBeInstanceOf(Date);
-    });
-
-
     test('should skip if user is not present in request', async () => {
       const getAppConfig = jest.fn().mockResolvedValue({
         balance: {

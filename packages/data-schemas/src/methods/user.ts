@@ -106,9 +106,8 @@ export function createUserMethods(mongoose: typeof import('mongoose')) {
         };
       }
 
-      if (balanceConfig.perSpec) {
-        update.$set.perSpecTokenCredits = {}
-      }
+      // handle per model specs balance
+      update.$set.perSpecTokenCredits = {}
 
       await Balance.findOneAndUpdate({ user: user._id }, update, {
         upsert: true,
