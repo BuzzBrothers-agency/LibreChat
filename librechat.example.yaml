@@ -622,3 +622,12 @@ floatingButtons:
     url: "https://librechat.ai/by-som-credits"
     # Open the link in a new tab
     newTab: true
+    
+# Admin access configuration for securing admin endpoints with API keys
+# These access are required to execute admin operations such as:
+# - Managing balances
+# - Others to come...
+# adminAccess:
+  # - apiKey: "librechat-admin-api-key-1234567890"
+  #   name: "Main Admin Key"
+  #   description: "Admin API Key with full access permissions"
