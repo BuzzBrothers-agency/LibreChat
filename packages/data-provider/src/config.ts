@@ -909,6 +909,16 @@ export const ocrSchema = z.object({
   strategy: z.nativeEnum(OCRStrategy).default(OCRStrategy.MISTRAL_OCR),
 });
 
+export const adminAccessEntrySchema = z.object({
+  apiKey: z.string(),
+  description: z.string().optional(),
+});
+
+export const adminAccessSchema = z.array(adminAccessEntrySchema);
+
+export type TAdminAccessEntry = z.infer<typeof adminAccessEntrySchema>;
+export type TAdminAccess = z.infer<typeof adminAccessSchema>;
+
 export const balanceSchema = z.object({
   enabled: z.boolean().optional().default(false),
   startBalance: z.number().optional().default(20000),
@@ -984,6 +994,7 @@ export const configSchema = z.object({
     .default({ socialLogins: defaultSocialLogins }),
   balance: balanceSchema.optional(),
   transactions: transactionsSchema.optional(),
+  adminAccess: adminAccessSchema.optional(),
   speech: z
     .object({
       tts: ttsSchema.optional(),

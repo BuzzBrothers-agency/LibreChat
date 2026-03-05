@@ -80,6 +80,8 @@ export interface AppConfig {
   balance?: Partial<TCustomConfig['balance']>;
   /** Transactions configuration */
   transactions?: TCustomConfig['transactions'];
+  /** Admin access API key configuration */
+  adminAccess?: TCustomConfig['adminAccess'];
   /** Speech configuration */
   speech?: TCustomConfig['speech'];
   /** MCP server configuration */
