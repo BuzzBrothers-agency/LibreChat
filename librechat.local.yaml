@@ -1,0 +1,4 @@
+
+adminAccess:
+  - apiKey: "${BB_ADMIN_ACCESS_API_KEY}"
+    description: "Admin API Key with full access permissions"
