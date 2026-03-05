@@ -1,11 +1,33 @@
 interface:
   customWelcome: "Welcome to LibreChat by Buzz! Enjoy your experience."
   modelSelect: false
+  parameters: false
+  presets: false
+  prompts:
+    use: false
+    create: false
+  bookmarks: false
+  agents:
+    use: true
+    create: false
+  peoplePicker:
+    users: false
+    groups: false
+    roles: false
+  remoteAgents:
+    use: true
+  mcpServers:
+    use: true
+    create: false
+    share: false
 
 registration:
   socialLogins: ["google"]
   allowedDomains:
     - "buzzbrothers.ch"
+
+balance:
+  enabled: true
 
 transactions:
   enabled: true
