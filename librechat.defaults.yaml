@@ -62,6 +62,7 @@ modelSpecs:
       preset:
         endpoint: "azureOpenAI"
         model: "gpt-4.1"
+        assistant_id: "asst_nJStaqkXBLFTxN2o9oWjyYWh"
 
 # Floating button configuration for quick access to features like feedback, support, or documentation
 floatingButtons:
