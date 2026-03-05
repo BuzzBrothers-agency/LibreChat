@@ -1,0 +1,10 @@
+webSearch:
+  cohereApiKey: "${COHERE_API_KEY}"
+  searchProvider: "searxng"
+  searxngInstanceUrl: "${SEARXNG_INSTANCE_URL}"
+  searxngApiKey: "${SEARXNG_API_KEY}"
+  firecrawlApiKey: "${FIRECRAWL_API_KEY}"
+
+adminAccess:
+  - apiKey: "${BB_ADMIN_ACCESS_API_KEY}"
+    description: "Admin API Key with full access permissions"
