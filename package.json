@@ -49,7 +49,7 @@
     "build:client-package": "cd packages/client && npm run build",
     "build:packages": "npm run build:data-provider && npm run build:data-schemas && npm run build:api && npm run build:client-package",
     "build": "npx turbo run build",
-    "build:librechatyaml": "source .env && yq eval-all '. as $item ireduce ({}; . * $item )' librechat.example.yaml librechat.defaults.yaml librechat.${ENVIRONMENT:=local}.yaml > librechat.yaml && echo \"librechat.yaml\" has been builded successfully",
+    "build:librechatyaml": "source .env && yq eval-all '. as $item ireduce ({}; . * $item )' librechat.example.yaml librechat.defaults.yaml librechat.${ENVIRONMENT:-local}.yaml > librechat.yaml && echo \"librechat.yaml\" has been builded successfully",
     "frontend": "npm run build:data-provider && npm run build:data-schemas && npm run build:api && npm run build:client-package && cd client && npm run build",
     "frontend:ci": "npm run build:data-provider && npm run build:client-package && cd client && npm run build:ci",
     "frontend:dev": "cd client && npm run dev",
