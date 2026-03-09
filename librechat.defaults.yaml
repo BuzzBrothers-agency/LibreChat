@@ -55,7 +55,7 @@ endpoints:
     titleConvo: true
     titleModel: "current_model"
     groups:
-      - group: "BuzzAI"
+      - group: "JTI Azure"
         apiKey: "${BB_AZURE_API_KEY}"
         instanceName: "buzzgpt-swiss"
         # baseURL: "https://buzzgpt-swiss.openai.azure.com/"
@@ -63,17 +63,33 @@ endpoints:
         assistants: true
         # version must be "2024-02-15-preview" or later
         models:
-          gpt-4.1:
+          jti-azure-gpt-4-1:
             deploymentName: "gpt-4.1"
             version: "2024-12-01-preview"
+            webSearch: true
+          jti-azure-gpt-5-2:
+            deploymentName: "gpt-5.2"
+            version: "2024-05-01-preview"
+            webSearch: true
+          jti-azure-gpt-5-2-chat:
+            deploymentName: "gpt-5.2-chat"
+            version: "2024-05-01-preview"
+            webSearch: true
+          jti-azure-gpt-5-pro:
+            deploymentName: "gpt-5-pro"
+            version: "2024-05-01-preview"
+            webSearch: true
+          jti-azure-o3:
+            deploymentName: "o3"
+            version: "2024-05-01-preview"
             webSearch: true
 
 modelSpecs:
   list:
-    - name: "buzz-gpt-4-1"
-      label: "Buzz GPT-4.1"
-      description: "Most funny BuzzAI model"
-      group: "BuzzAI" # String value matching the endpoint name
+    - name: "jti-azure-gpt-4-1"
+      label: "JTI Azure GPT 4.1"
+      description: "JTI related models/assistants/agents"
+      group: "JTI Azure" # String value matching the endpoint name
       balance:
         enabled: true
         # startBalance: 999
@@ -81,10 +97,86 @@ modelSpecs:
         # refillIntervalValue: 1
         # refillIntervalUnit: 'seconds'
         # refillAmount: 111
+        requestCreditsUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdVUBs_Yi0Zakzmi0p3qGszsiJ1-ItIcgHw-zZAZuPwAX6Q3A/viewform?model=jti-azure-gpt-4-1'
       preset:
         endpoint: "azureOpenAI"
-        model: "gpt-4.1"
+        model: "jti-azure-gpt-4-1"
+    - name: "jti-azure-gpt-4-1-assistant"
+      label: "JTI Azure GTP 4.1 (assistant)"
+      description: ""
+      group: "JTI Azure" # String value matching the endpoint name
+      balance:
+        enabled: true
+        # startBalance: 999
+        # autoRefillEnabled: true
+        # refillIntervalValue: 1
+        # refillIntervalUnit: 'seconds'
+        # refillAmount: 111
+        requestCreditsUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdVUBs_Yi0Zakzmi0p3qGszsiJ1-ItIcgHw-zZAZuPwAX6Q3A/viewform?model=jti-azure-gpt-4-1-assistant'
+      preset:
+        endpoint: "azureOpenAI"
+        model: "jti-azure-gpt-4-1"
         assistant_id: "asst_nJStaqkXBLFTxN2o9oWjyYWh"
+    - name: "jti-azure-gpt-5-2"
+      label: "JTI Azure GPT 5.2"
+      description: ""
+      group: "JTI Azure" # String value matching the endpoint name
+      balance:
+        enabled: true
+        # startBalance: 999
+        # autoRefillEnabled: true
+        # refillIntervalValue: 1
+        # refillIntervalUnit: 'seconds'
+        # refillAmount: 111
+        requestCreditsUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdVUBs_Yi0Zakzmi0p3qGszsiJ1-ItIcgHw-zZAZuPwAX6Q3A/viewform?model=jti-azure-gpt-5-2'
+      preset:
+        endpoint: "azureOpenAI"
+        model: "jti-azure-gpt-5-2"
+    - name: "jti-azure-gpt-5-2-chat"
+      label: "JTI Azure GTP 5.2 Chat"
+      description: ""
+      group: "JTI Azure" # String value matching the endpoint name
+      balance:
+        enabled: true
+        # startBalance: 999
+        # autoRefillEnabled: true
+        # refillIntervalValue: 1
+        # refillIntervalUnit: 'seconds'
+        # refillAmount: 111
+        requestCreditsUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdVUBs_Yi0Zakzmi0p3qGszsiJ1-ItIcgHw-zZAZuPwAX6Q3A/viewform?model=jti-azure-gpt-5-2-chat'
+      preset:
+        endpoint: "azureOpenAI"
+        model: "jti-azure-gpt-5-2"
+    - name: "jti-azure-gpt-5-pro"
+      label: "JTI Azure GTP 5 Pro"
+      description: ""
+      group: "JTI Azure" # String value matching the endpoint name
+      balance:
+        enabled: true
+        # startBalance: 999
+        # autoRefillEnabled: true
+        # refillIntervalValue: 1
+        # refillIntervalUnit: 'seconds'
+        # refillAmount: 111
+        requestCreditsUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdVUBs_Yi0Zakzmi0p3qGszsiJ1-ItIcgHw-zZAZuPwAX6Q3A/viewform?model=jti-azure-gpt-5-pro'
+      preset:
+        endpoint: "azureOpenAI"
+        model: "jti-azure-gpt-5-pro"
+    - name: "jti-azure-o3"
+      label: "JTI Azure o3"
+      description: ""
+      group: "JTI Azure" # String value matching the endpoint name
+      balance:
+        enabled: true
+        # startBalance: 999
+        # autoRefillEnabled: true
+        # refillIntervalValue: 1
+        # refillIntervalUnit: 'seconds'
+        # refillAmount: 111
+        requestCreditsUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdVUBs_Yi0Zakzmi0p3qGszsiJ1-ItIcgHw-zZAZuPwAX6Q3A/viewform?model=jti-azure-gpt-o3'
+      preset:
+        endpoint: "azureOpenAI"
+        model: "jti-azure-o3"
 
 # Floating button configuration for quick access to features like feedback, support, or documentation
 floatingButtons:
