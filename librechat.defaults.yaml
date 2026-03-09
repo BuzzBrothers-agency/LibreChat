@@ -97,7 +97,7 @@ modelSpecs:
         # refillIntervalValue: 1
         # refillIntervalUnit: 'seconds'
         # refillAmount: 111
-        requestCreditsUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdVUBs_Yi0Zakzmi0p3qGszsiJ1-ItIcgHw-zZAZuPwAX6Q3A/viewform?model=jti-azure-gpt-4-1'
+        requestCreditsUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdVUBs_Yi0Zakzmi0p3qGszsiJ1-ItIcgHw-zZAZuPwAX6Q3A/viewform?usp=pp_url&entry.151781642=jti-azure-gpt-4-1'
       preset:
         endpoint: "azureOpenAI"
         model: "jti-azure-gpt-4-1"
@@ -112,7 +112,7 @@ modelSpecs:
         # refillIntervalValue: 1
         # refillIntervalUnit: 'seconds'
         # refillAmount: 111
-        requestCreditsUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdVUBs_Yi0Zakzmi0p3qGszsiJ1-ItIcgHw-zZAZuPwAX6Q3A/viewform?model=jti-azure-gpt-4-1-assistant'
+        requestCreditsUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdVUBs_Yi0Zakzmi0p3qGszsiJ1-ItIcgHw-zZAZuPwAX6Q3A/viewform?usp=pp_url&entry.151781642=jti-azure-gpt-4-1-assistant'
       preset:
         endpoint: "azureOpenAI"
         model: "jti-azure-gpt-4-1"
@@ -128,7 +128,7 @@ modelSpecs:
         # refillIntervalValue: 1
         # refillIntervalUnit: 'seconds'
         # refillAmount: 111
-        requestCreditsUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdVUBs_Yi0Zakzmi0p3qGszsiJ1-ItIcgHw-zZAZuPwAX6Q3A/viewform?model=jti-azure-gpt-5-2'
+        requestCreditsUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdVUBs_Yi0Zakzmi0p3qGszsiJ1-ItIcgHw-zZAZuPwAX6Q3A/viewform?usp=pp_url&entry.151781642=jti-azure-gpt-5-2'
       preset:
         endpoint: "azureOpenAI"
         model: "jti-azure-gpt-5-2"
@@ -143,7 +143,7 @@ modelSpecs:
         # refillIntervalValue: 1
         # refillIntervalUnit: 'seconds'
         # refillAmount: 111
-        requestCreditsUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdVUBs_Yi0Zakzmi0p3qGszsiJ1-ItIcgHw-zZAZuPwAX6Q3A/viewform?model=jti-azure-gpt-5-2-chat'
+        requestCreditsUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdVUBs_Yi0Zakzmi0p3qGszsiJ1-ItIcgHw-zZAZuPwAX6Q3A/viewform?usp=pp_url&entry.151781642=jti-azure-gpt-5-2-chat'
       preset:
         endpoint: "azureOpenAI"
         model: "jti-azure-gpt-5-2"
@@ -158,7 +158,7 @@ modelSpecs:
         # refillIntervalValue: 1
         # refillIntervalUnit: 'seconds'
         # refillAmount: 111
-        requestCreditsUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdVUBs_Yi0Zakzmi0p3qGszsiJ1-ItIcgHw-zZAZuPwAX6Q3A/viewform?model=jti-azure-gpt-5-pro'
+        requestCreditsUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdVUBs_Yi0Zakzmi0p3qGszsiJ1-ItIcgHw-zZAZuPwAX6Q3A/viewform?usp=pp_url&entry.151781642=jti-azure-gpt-5-pro'
       preset:
         endpoint: "azureOpenAI"
         model: "jti-azure-gpt-5-pro"
@@ -173,7 +173,7 @@ modelSpecs:
         # refillIntervalValue: 1
         # refillIntervalUnit: 'seconds'
         # refillAmount: 111
-        requestCreditsUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdVUBs_Yi0Zakzmi0p3qGszsiJ1-ItIcgHw-zZAZuPwAX6Q3A/viewform?model=jti-azure-gpt-o3'
+        requestCreditsUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdVUBs_Yi0Zakzmi0p3qGszsiJ1-ItIcgHw-zZAZuPwAX6Q3A/viewform?usp=pp_url&entry.151781642=jti-azure-gpt-o3'
       preset:
         endpoint: "azureOpenAI"
         model: "jti-azure-o3"
