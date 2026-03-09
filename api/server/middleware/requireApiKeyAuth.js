@@ -1,4 +1,5 @@
 const { getAppConfig } = require('~/server/services/Config/app');
+const { extractEnvVariable } = require('librechat-data-provider');
 
 /**
  * Custom Middleware to handle API key authentication for admin routes.
@@ -12,7 +13,16 @@ const requireApiKeyAuth = async (req, res, next) => {
 
   // search for the api key in the admin access list
   const apiKey = req.headers['x-api-key'];
-  const adminAccess = appConfig.adminAccess.find((access) => access.apiKey === apiKey);
+
+  // get the adminAccess corresponding to the passed apiKey
+  const adminAccess = appConfig.adminAccess
+    .map((access) => {
+      return {
+        ...access,
+        apiKey: extractEnvVariable(access.apiKey ?? ''),
+      };
+    })
+    .find((access) => access.apiKey === apiKey);
 
   // If no matching API key is found, return 403 Forbidden
   if (!adminAccess) {
