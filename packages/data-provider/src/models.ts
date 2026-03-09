@@ -14,10 +14,10 @@ export const specBalanceSchema = z.object({
   startBalance: z.number().optional(),
   autoRefillEnabled: z.boolean().optional(),
   refillIntervalValue: z.number().optional(),
-  refillIntervalUnit: z
-    .enum(['seconds', 'minutes', 'hours', 'days', 'weeks', 'months'])
-    .optional(),
+  refillIntervalUnit: z.enum(['seconds', 'minutes', 'hours', 'days', 'weeks', 'months']).optional(),
   refillAmount: z.number().optional(),
+  /** URL to redirect users to when they need to request more credits for this spec. */
+  requestCreditsUrl: z.string().url().optional(),
 });
 
 export type TSpecBalance = z.infer<typeof specBalanceSchema>;

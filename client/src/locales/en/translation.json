@@ -1299,6 +1299,7 @@
   "com_ui_rename_failed": "Failed to rename conversation",
   "com_ui_rename_prompt": "Rename Prompt",
   "com_ui_rename_prompt_name": "Rename Prompt - {{name}}",
+  "com_ui_request_credits": "Request credits",
   "com_ui_requires_auth": "Requires Authentication",
   "com_ui_reset": "Reset",
   "com_ui_reset_adjustments": "Reset adjustments",
