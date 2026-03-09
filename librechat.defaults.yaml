@@ -88,7 +88,7 @@ modelSpecs:
   list:
     - name: "jti-azure-gpt-4-1"
       label: "JTI Azure GPT 4.1"
-      description: "JTI related models/assistants/agents"
+      description: ""
       group: "JTI Azure" # String value matching the endpoint name
       balance:
         enabled: true
