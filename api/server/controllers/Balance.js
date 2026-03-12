@@ -45,7 +45,7 @@ async function adminAddBalanceController(req, res) {
         user: user._id,
         tokenType: 'credits',
         context: 'admin',
-        spec,
+        specName: spec,
         rawAmount: +amount,
         balance: balanceConfig,
       },
@@ -190,5 +190,5 @@ module.exports = {
   getBalanceController,
   adminAddBalanceController,
   adminSetBalanceController,
-  adminGetBalanceController
+  adminGetBalanceController,
 };
