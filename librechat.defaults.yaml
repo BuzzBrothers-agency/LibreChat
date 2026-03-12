@@ -9,7 +9,7 @@ interface:
   bookmarks: false
   agents:
     use: true
-    create: false
+    create: true
   peoplePicker:
     users: false
     groups: false
