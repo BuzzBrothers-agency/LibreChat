@@ -83,6 +83,7 @@ endpoints:
             deploymentName: "o3"
             version: "2024-05-01-preview"
             webSearch: true
+
       - group: "Models"
         apiKey: "${BB_AZURE_API_KEY}"
         instanceName: "buzzgpt-swiss"
@@ -91,46 +92,33 @@ endpoints:
         assistants: true
         # version must be "2024-02-15-preview" or later
         models:
-          jti-azure-gpt-4-1:
+          jti-azure-gpt-4-1-agent:
             deploymentName: "gpt-4.1"
             version: "2024-12-01-preview"
             webSearch: true
-          jti-azure-gpt-5-2:
+          jti-azure-gpt-5-2-agent:
             deploymentName: "gpt-5.2"
             version: "2024-05-01-preview"
             webSearch: true
-          jti-azure-gpt-5-2-chat:
+          jti-azure-gpt-5-2-chat-agent:
             deploymentName: "gpt-5.2-chat"
             version: "2024-05-01-preview"
             webSearch: true
-          jti-azure-gpt-5-pro:
+          jti-azure-gpt-5-pro-agent:
             deploymentName: "gpt-5-pro"
             version: "2024-05-01-preview"
             webSearch: true
-          jti-azure-o3:
+          jti-azure-o3-agent:
             deploymentName: "o3"
             version: "2024-05-01-preview"
             webSearch: true
 
 modelSpecs:
   list:
-    - name: "jti-azure-gpt-4-1"
-      label: "JTI Azure GPT 4.1"
-      description: ""
-      group: "JTI Azure" # String value matching the endpoint name
-      balance:
-        enabled: true
-        # startBalance: 999
-        # autoRefillEnabled: true
-        # refillIntervalValue: 1
-        # refillIntervalUnit: 'seconds'
-        # refillAmount: 111
-        requestCreditsUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdVUBs_Yi0Zakzmi0p3qGszsiJ1-ItIcgHw-zZAZuPwAX6Q3A/viewform?usp=pp_url&entry.151781642=jti-azure-gpt-4-1'
-      preset:
-        endpoint: "azureOpenAI"
-        model: "jti-azure-gpt-4-1"
-    - name: "jti-azure-gpt-4-1-assistant"
-      label: "JTI Azure GTP 4.1 (assistant)"
+
+    # Agents
+    - name: "jti-azure-gpt-4-1-agent"
+      label: "JTI Azure GPT 4.1 (agent)"
       description: ""
       group: "Agents" # String value matching the endpoint name
       balance:
@@ -140,10 +128,10 @@ modelSpecs:
         # refillIntervalValue: 1
         # refillIntervalUnit: 'seconds'
         # refillAmount: 111
-        requestCreditsUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdVUBs_Yi0Zakzmi0p3qGszsiJ1-ItIcgHw-zZAZuPwAX6Q3A/viewform?usp=pp_url&entry.151781642=jti-azure-gpt-4-1-assistant'
+        requestCreditsUrl: https://docs.google.com/forms/d/e/1FAIpQLSdVUBs_Yi0Zakzmi0p3qGszsiJ1-ItIcgHw-zZAZuPwAX6Q3A/viewform?usp=pp_url&entry.151781642=jti-azure-gpt-4-1-agent'
       preset:
         endpoint: "azureOpenAI"
-        model: "jti-azure-gpt-4-1"
+        model: "jti-azure-gpt-4-1-agent"
         assistant_id: "asst_nJStaqkXBLFTxN2o9oWjyYWh"
 
     - name: "jti-azure-gpt-5-2-agent"
@@ -157,10 +145,10 @@ modelSpecs:
         # refillIntervalValue: 1
         # refillIntervalUnit: 'seconds'
         # refillAmount: 111
-        requestCreditsUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdVUBs_Yi0Zakzmi0p3qGszsiJ1-ItIcgHw-zZAZuPwAX6Q3A/viewform?usp=pp_url&entry.151781642=jti-azure-gpt-5-2'
+        requestCreditsUrl: https://docs.google.com/forms/d/e/1FAIpQLSdVUBs_Yi0Zakzmi0p3qGszsiJ1-ItIcgHw-zZAZuPwAX6Q3A/viewform?usp=pp_url&entry.151781642=jti-azure-gpt-5-2-agent'
       preset:
         endpoint: "azureOpenAI"
-        model: "jti-azure-gpt-5-2"
+        model: "jti-azure-gpt-5-2-agent"
         assistant_id: "asst_nJStaqkXBLFTxN2o9oWjyYWh"
 
     - name: "jti-azure-gpt-5-2-chat-agent"
@@ -174,10 +162,10 @@ modelSpecs:
         # refillIntervalValue: 1
         # refillIntervalUnit: 'seconds'
         # refillAmount: 111
-        requestCreditsUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdVUBs_Yi0Zakzmi0p3qGszsiJ1-ItIcgHw-zZAZuPwAX6Q3A/viewform?usp=pp_url&entry.151781642=jti-azure-gpt-5-2-chat'
+        requestCreditsUrl: https://docs.google.com/forms/d/e/1FAIpQLSdVUBs_Yi0Zakzmi0p3qGszsiJ1-ItIcgHw-zZAZuPwAX6Q3A/viewform?usp=pp_url&entry.151781642=jti-azure-gpt-5-2-chat-agent'
       preset:
         endpoint: "azureOpenAI"
-        model: "jti-azure-gpt-5-2"
+        model: "jti-azure-gpt-5-2-agent"
         assistant_id: "asst_nJStaqkXBLFTxN2o9oWjyYWh"
 
     - name: "jti-azure-gpt-5-pro-agent"
@@ -191,10 +179,11 @@ modelSpecs:
         # refillIntervalValue: 1
         # refillIntervalUnit: 'seconds'
         # refillAmount: 111
-        requestCreditsUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdVUBs_Yi0Zakzmi0p3qGszsiJ1-ItIcgHw-zZAZuPwAX6Q3A/viewform?usp=pp_url&entry.151781642=jti-azure-gpt-5-pro'
+        requestCreditsUrl: https://docs.google.com/forms/d/e/1FAIpQLSdVUBs_Yi0Zakzmi0p3qGszsiJ1-ItIcgHw-zZAZuPwAX6Q3A/viewform?usp=pp_url&entry.151781642=jti-azure-gpt-5-pro-agent'
       preset:
         endpoint: "azureOpenAI"
-        model: "jti-azure-gpt-5-pro"
+        model: "jti-azure-gpt-5-pro-agent"
+        assistant_id: "asst_nJStaqkXBLFTxN2o9oWjyYWh"
 
     - name: "jti-azure-o3-agent"
       label: "JTI Azure o3 (agent)"
@@ -210,7 +199,7 @@ modelSpecs:
         requestCreditsUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdVUBs_Yi0Zakzmi0p3qGszsiJ1-ItIcgHw-zZAZuPwAX6Q3A/viewform?usp=pp_url&entry.151781642=jti-azure-gpt-o3'
       preset:
         endpoint: "azureOpenAI"
-        model: "jti-azure-o3"
+        model: "jti-azure-o3-agent"
         assistant_id: "asst_nJStaqkXBLFTxN2o9oWjyYWh"
 
     # Models
